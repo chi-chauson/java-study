@@ -1,9 +1,15 @@
 package com.leetcode.algorithm;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 public class GraphUtil {
 
@@ -65,11 +71,11 @@ public class GraphUtil {
     /**
      * Depth-First Search to mark all connected land cells starting from (row, col).
      *
-     * @param grid  the 2D grid
-     * @param row   current row index
-     * @param col   current column index
-     * @param rows  total number of rows in the grid
-     * @param cols  total number of columns in the grid
+     * @param grid the 2D grid
+     * @param row  current row index
+     * @param col  current column index
+     * @param rows total number of rows in the grid
+     * @param cols total number of columns in the grid
      */
     private void dfsNumIslands(char[][] grid, int row, int col, int rows, int cols) {
         // Check for out-of-bounds or if the cell is water ('0')
@@ -156,11 +162,11 @@ public class GraphUtil {
     /**
      * Depth-First Search to calculate the area of an island.
      *
-     * @param grid  the binary matrix representing the grid
-     * @param r     current row
-     * @param c     current column
-     * @param rows  total number of rows in the grid
-     * @param cols  total number of columns in the grid
+     * @param grid the binary matrix representing the grid
+     * @param r    current row
+     * @param c    current column
+     * @param rows total number of rows in the grid
+     * @param cols total number of columns in the grid
      * @return the area of the island
      */
     private int dfs(int[][] grid, int r, int c, int rows, int cols) {
@@ -183,5 +189,57 @@ public class GraphUtil {
         return area;
     }
 
+    /**
+     * Returns the maximum number of nodes that can be reached from node 0 without visiting any restricted nodes.
+     *
+     * @param n          the number of nodes in the tree
+     * @param edges      the list of edges representing the tree
+     * @param restricted the list of restricted nodes
+     * @return the number of reachable nodes from node 0 without visiting restricted nodes
+     */
+    public int reachableNodes(int n, int[][] edges, int[] restricted) {
+        // Create adjacency list using HashMap
+        Map<Integer, List<Integer>> adj = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            adj.put(i, new ArrayList<>());
+        }
+        for (int[] edge : edges) {
+            int a = edge[0];
+            int b = edge[1];
+            adj.get(a).add(b);
+            adj.get(b).add(a);
+        }
 
+        // Convert restricted array to a set for O(1) lookups
+        Set<Integer> restrictedSet = new HashSet<>();
+        for (int node : restricted) {
+            restrictedSet.add(node);
+        }
+
+        // Iterative DFS using a Deque
+        Deque<Integer> stack = new ArrayDeque<>();
+        boolean[] visited = new boolean[n];
+        int count = 0;
+
+        // Start DFS from node 0
+        stack.push(0);
+        visited[0] = true;
+
+        while (!stack.isEmpty()) {
+            int current = stack.pop();
+            count++;
+
+            for (int neighbor : adj.get(current)) {
+                if (!visited[neighbor] && !restrictedSet.contains(neighbor)) {
+                    stack.push(neighbor);
+                    visited[neighbor] = true;
+                }
+            }
+        }
+
+        return count;
+    }
 }
+
+
+

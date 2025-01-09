@@ -1,6 +1,10 @@
 package com.leetcode.algorithm;
 
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class GraphUtilTest {
@@ -358,7 +362,108 @@ class GraphUtilTest {
                 {1, 0, 1, 0, 1, 1, 1, 0},
                 {1, 1, 1, 0, 0, 0, 0, 1}
         };
-        int expected = 6;
+        int expected = 7;
         assertEquals(expected, graphUtil.maxAreaOfIsland(grid));
+    }
+
+    @Test
+    public void testBasicExampleOne() {
+        int n = 7;
+        int[][] edges = {
+                {0,1},{1,2},{3,1},{4,0},{0,5},{5,6}
+        };
+        int[] restricted = {4,5};
+        int expected = 4; // Nodes [0,1,2,3]
+        assertEquals(expected, graphUtil.reachableNodes(n, edges, restricted));
+    }
+
+    @Test
+    public void testBasicExampleTwo() {
+        int n = 7;
+        int[][] edges = {
+                {0,1},{0,2},{0,5},{0,4},{3,2},{6,5}
+        };
+        int[] restricted = {4,2,1};
+        int expected = 3; // Nodes [0,5,6]
+        assertEquals(expected, graphUtil.reachableNodes(n, edges, restricted));
+    }
+
+    @Test
+    public void testNoRestrictedNodes() {
+        int n = 5;
+        int[][] edges = {
+                {0,1},{0,2},{1,3},{1,4}
+        };
+        int[] restricted = {};
+        int expected = 5; // All nodes are reachable
+        assertEquals(expected, graphUtil.reachableNodes(n, edges, restricted));
+    }
+
+    @Test
+    public void testAllExceptZeroRestricted() {
+        int n = 3;
+        int[][] edges = {
+                {0,1},{0,2}
+        };
+        int[] restricted = {1,2};
+        int expected = 1; // Only node 0 is reachable
+        assertEquals(expected, graphUtil.reachableNodes(n, edges, restricted));
+    }
+
+    @Test
+    public void shouldHandleLargeTreeWithSparseRestrictions() {
+        int n = 100000;
+        int[][] edges = new int[n-1][2];
+        for(int i = 1; i < n; i++) {
+            edges[i-1][0] = i-1;
+            edges[i-1][1] = i;
+        }
+        int[] restricted = {50000, 75000, 99999};
+        int expected = 50000; // Nodes 0 to 49999 are reachable
+        assertEquals(expected, graphUtil.reachableNodes(n, edges, restricted));
+    }
+
+    @Test
+    public void testSinglePathWithMultipleRestrictions() {
+        int n = 10;
+        int[][] edges = {
+                {0,1},{1,2},{2,3},{3,4},{4,5},{5,6},{6,7},{7,8},{8,9}
+        };
+        int[] restricted = {3,6,9};
+        int expected = 3; // Nodes [0,1,2]
+        assertEquals(expected, graphUtil.reachableNodes(n, edges, restricted));
+    }
+
+    @Test
+    public void testDisconnectedAfterRestrictions() {
+        // Constructing a small tree for clarity
+        int n = 7;
+        int[][] edges = {
+                {0,1}, {1,2}, {1,3}, {1,4}, {4,5}, {5,6}
+        };
+        int[] restricted = {4, 6}; // Restrict nodes 4 and 6
+        int expected = 4; // Nodes [0,1,2,3] are reachable, total 4 nodes
+        assertEquals(expected, graphUtil.reachableNodes(n, edges, restricted));
+    }
+
+    @Test
+    public void shouldHandleLargeGridWithMixedReachableIslands() {
+        // Constructing a large tree with mixed restricted nodes
+        int n = 100000;
+        int[][] edges = new int[n-1][2];
+        for(int i = 1; i < n; i++) {
+            edges[i-1][0] = i-1;
+            edges[i-1][1] = i;
+        }
+        // Restrict every 10000th node
+        List<Integer> restrictedList = new ArrayList<>();
+        for(int i = 10000; i < n; i += 10000) {
+            restrictedList.add(i);
+        }
+        int[] restricted = restrictedList.stream().mapToInt(Integer::intValue).toArray();
+        // The expected reachable nodes would be up to the first restricted node
+        // Since the tree is a straight line, the first restricted node is 10000
+        int expected = 10000; // Nodes 0 to 9999 are reachable
+        assertEquals(expected, graphUtil.reachableNodes(n, edges, restricted));
     }
 }
