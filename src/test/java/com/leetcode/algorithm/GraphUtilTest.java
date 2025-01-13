@@ -466,4 +466,109 @@ class GraphUtilTest {
         int expected = 10000; // Nodes 0 to 9999 are reachable
         assertEquals(expected, graphUtil.reachableNodes(n, edges, restricted));
     }
+
+    @Test
+    void testShortestPath_SimplePathExists() {
+        int[][] grid = {
+                {0, 1},
+                {1, 0}
+        };
+        int expected = 2;
+        int actual = graphUtil.shortestPathBinaryMatrix(grid);
+        assertEquals(expected, actual, "Should return the shortest path length when a simple path exists.");
+    }
+
+    @Test
+    void testShortestPath_PathBlockedAtStart() {
+        int[][] grid = {
+                {1, 0},
+                {0, 0}
+        };
+        int expected = -1;
+        int actual = graphUtil.shortestPathBinaryMatrix(grid);
+        assertEquals(expected, actual, "Should return -1 when the starting cell is blocked.");
+    }
+
+    @Test
+    void testShortestPath_PathBlockedAtEnd() {
+        int[][] grid = {
+                {0, 0},
+                {0, 1}
+        };
+        int expected = -1;
+        int actual = graphUtil.shortestPathBinaryMatrix(grid);
+        assertEquals(expected, actual, "Should return -1 when the ending cell is blocked.");
+    }
+
+    @Test
+    void testShortestPath_NoPathExists() {
+        int[][] grid = {
+                {0, 1, 1},
+                {1, 1, 1},
+                {1, 1, 0}
+        };
+        int expected = -1;
+        int actual = graphUtil.shortestPathBinaryMatrix(grid);
+        assertEquals(expected, actual, "Should return -1 when no clear path exists.");
+    }
+
+    @Test
+    void testShortestPath_LargeGridWithPath() {
+        int[][] grid = {
+                {0, 0, 0, 0},
+                {1, 1, 0, 1},
+                {0, 0, 0, 0},
+                {0, 1, 1, 0}
+        };
+        int expected = 5;
+        int actual = graphUtil.shortestPathBinaryMatrix(grid);
+        assertEquals(expected, actual, "Should return the correct path length in a larger grid with a valid path.");
+    }
+
+    @Test
+    void testShortestPath_SixBySixGrid() {
+        int[][] grid = {
+                {0, 0, 1, 1, 1, 1},
+                {0, 1, 0, 1, 1, 1},
+                {0, 1, 1, 0, 1, 1},
+                {0, 0, 0, 0, 0, 1},
+                {1, 1, 1, 1, 0, 0},
+                {1, 1, 1, 1, 1, 0}
+        };
+        int expected = 7;
+        int actual = graphUtil.shortestPathBinaryMatrix(grid);
+        assertEquals(expected, actual, "Should return the correct path length in a larger grid with a valid path.");
+    }
+
+    @Test
+    void testShortestPath_SingleCellGrid() {
+        int[][] grid = {
+                {0}
+        };
+        int expected = 1;
+        int actual = graphUtil.shortestPathBinaryMatrix(grid);
+        assertEquals(expected, actual, "Should return 1 for a single-cell grid that is clear.");
+    }
+
+    @Test
+    void testShortestPath_SingleCellBlocked() {
+        int[][] grid = {
+                {1}
+        };
+        int expected = -1;
+        int actual = graphUtil.shortestPathBinaryMatrix(grid);
+        assertEquals(expected, actual, "Should return -1 for a single-cell grid that is blocked.");
+    }
+
+    @Test
+    void testShortestPath_PathWithDiagonalMoves() {
+        int[][] grid = {
+                {0, 1, 1},
+                {1, 0, 1},
+                {1, 1, 0}
+        };
+        int expected = 3;
+        int actual = graphUtil.shortestPathBinaryMatrix(grid);
+        assertEquals(expected, actual, "Should correctly account for diagonal moves in the path.");
+    }
 }
