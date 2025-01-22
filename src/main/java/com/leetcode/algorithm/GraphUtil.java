@@ -339,6 +339,71 @@ public class GraphUtil {
     private boolean isValid(int row, int col, int n) {
         return row >= 0 && row < n && col >= 0 && col < n;
     }
+
+    /**
+     * Finds the number of steps in the shortest path from the entrance
+     * to the nearest exit in the maze.
+     *
+     * @param maze      An m x n matrix of '.' and '+' characters.
+     * @param entrance  An array of two integers [entranceRow, entranceCol].
+     * @return          The shortest number of steps to an exit, or -1 if none exists.
+     */
+    public static int nearestExit(char[][] maze, int[] entrance) {
+        int m = maze.length;
+        int n = maze[0].length;
+
+        // Directions: up, down, left, right
+        int[][] directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+
+        // Queue will hold {row, col, distance}
+        Queue<int[]> queue = new LinkedList<>();
+        queue.offer(new int[]{entrance[0], entrance[1], 0});
+
+        // Mark entrance as visited by replacing '.' with '+'
+        // or we can maintain a separate visited array
+        maze[entrance[0]][entrance[1]] = '+';
+
+        while (!queue.isEmpty()) {
+            int[] current = queue.poll();
+            int row = current[0];
+            int col = current[1];
+            int distance = current[2];
+
+            // Explore neighbors
+            for (int[] dir : directions) {
+                int newRow = row + dir[0];
+                int newCol = col + dir[1];
+
+                // Check boundaries
+                if (newRow < 0 || newRow >= m || newCol < 0 || newCol >= n) {
+                    continue;
+                }
+                // If it's a wall or visited, skip
+                if (maze[newRow][newCol] == '+') {
+                    continue;
+                }
+
+                // If we're on the border, it's an exit (but not the entrance cell)
+                if (isBorderCell(newRow, newCol, m, n)) {
+                    return distance + 1;
+                }
+
+                // Mark cell as visited and add to queue
+                maze[newRow][newCol] = '+';
+                queue.offer(new int[]{newRow, newCol, distance + 1});
+            }
+        }
+
+        // No exit found
+        return -1;
+    }
+
+    /**
+     * Helper method to check if a given cell is on the border of the maze.
+     */
+    private static boolean isBorderCell(int row, int col, int m, int n) {
+        return row == 0 || row == m - 1 || col == 0 || col == n - 1;
+    }
 }
 
 
