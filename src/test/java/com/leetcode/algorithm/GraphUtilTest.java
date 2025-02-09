@@ -652,4 +652,87 @@ class GraphUtilTest {
         // but we check it doesn't return -1 and is a positive integer.
         assertTrue(steps > 0, "Should return a valid positive path length.");
     }
+
+    @Test
+    public void testSnakesAndLaddersClassicBoard() {
+        // This corresponds to the example in the prompt with output = 4
+        int[][] board = {
+                {-1, -1, -1, -1, -1, -1},
+                {-1, -1, -1, -1, -1, -1},
+                {-1, -1, -1, -1, -1, -1},
+                {-1, 35, -1, -1, 13, -1},
+                {-1, -1, -1, -1, -1, -1},
+                {-1, 15, -1, -1, -1, -1}
+        };
+        // Expected output: 4
+        assertEquals(4, GraphUtil.snakesAndLadders(board));
+    }
+
+    @Test
+    public void testSnakesAndLaddersSmallWithLadder() {
+        // This corresponds to the example in the prompt with output = 1
+        int[][] board = {
+                {-1, -1},
+                {-1,  3}
+        };
+        // Expected output: 1
+        assertEquals(1, GraphUtil.snakesAndLadders(board));
+    }
+
+    @Test
+    public void testSnakesAndLaddersNoPossiblePath() {
+        // Construct a board that effectively blocks movement to the last square
+        // For example, if the only non--1 squares create cycles away from n^2
+        // n=2 => squares 1..4
+        // We'll make a snake from square 2 -> 1, and from square 3 -> 1
+        // so you can never reach square 4
+        // Board layout (boustrophedon):
+        // Bottom row (left->right) squares: 1, 2
+        // Top row   (right->left) squares: 4, 3
+        // So board top-left is square 4, top-right is square 3,
+        // bottom-left is square 1, bottom-right is square 2.
+        // We'll put snakes on squares 2 and 3 that lead back to square 1.
+
+        int[][] board = {
+                {-1,  1},  // i=0 => top row => squares 4,3; 4 has -1, 3 has 1 => snake 3->1
+                {-1,  1}   // i=1 => bottom row => squares 1,2;  2 has 1 => snake 2->1
+        };
+        // There's no way to get to square 4 now, because from square 1,
+        // we can only move to 2 or 3 or 4 with a die roll:
+        // - If we roll 1, land on 2 => forced back to 1.
+        // - If we roll 2, land on 3 => forced back to 1.
+        // - If we roll 3, land on 4, but wait, n=2 => n^2=4 is possible in a direct roll of 3 from 1.
+        // Actually, you can land on 4 if you roll a 3.
+        // Let's modify to ensure it's truly unreachable:
+        // We'll make a ladder on square 4 that goes back to 1 as well (which is unusual but let's do it).
+
+        int[][] trulyBlockedBoard = {
+                { 1,  1},
+                {-1,  1}
+        };
+        // Now:
+        // - squares: bottom-left=1, bottom-right=2, top-left=4, top-right=3
+        // top-left(4)=1 => forced to 1, top-right(3)=1 => forced to 1, bottom-right(2)=1 => forced to 1
+        // There's no direct path to remain on 4. You always bounce back to 1 immediately.
+
+        assertEquals(-1, GraphUtil.snakesAndLadders(trulyBlockedBoard));
+    }
+
+    @Test
+    public void testSnakesAndLaddersMinimalBoard() {
+        // n=2, no snakes/ladders, you can jump directly to 4 in two ways:
+        // 1 -> (roll 3) -> 4 => 1 move
+        // or 1 -> (roll 1) -> 2 -> next turn, etc.
+        // Actually, from 1 you can roll a 3 to go to 4. So it should be 1 move.
+        int[][] board = {
+                {-1, -1},
+                {-1, -1}
+        };
+        // Let's confirm the labeling:
+        //   top row => squares 4,3
+        //   bottom row => squares 1,2
+        // No snakes, no ladders => finalPos[x] = x.
+        // From 1, roll 3 => directly land on 4 => done.
+        assertEquals(1, GraphUtil.snakesAndLadders(board));
+    }
 }

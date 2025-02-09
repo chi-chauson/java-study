@@ -404,6 +404,88 @@ public class GraphUtil {
     private static boolean isBorderCell(int row, int col, int m, int n) {
         return row == 0 || row == m - 1 || col == 0 || col == n - 1;
     }
+
+    /**
+     * Returns the least number of dice rolls required to reach square n^2
+     * on the given boustrophedon-labeled Snakes and Ladders board.
+     * If it is not possible to reach the last square, returns -1.
+     *
+     * @param board An n x n matrix, where board[i][j] = -1 for no snake/ladder,
+     *              or board[i][j] in [1, n^2] as the destination of a snake or ladder.
+     * @return Minimum number of dice rolls to reach square n^2, or -1 if impossible.
+     */
+    public static int snakesAndLadders(int[][] board) {
+        int n = board.length;
+        // Flatten the board into a 1D array finalPos where finalPos[square]
+        // tells where you actually land if you move to 'square'.
+        int[] finalPos = new int[n * n + 1];  // 1-based indexing (square 1..n^2)
+
+        // Fill finalPos by default to each index (i.e. no snake/ladder).
+        for (int i = 1; i <= n * n; i++) {
+            finalPos[i] = i;
+        }
+
+        // Populate finalPos according to the board.
+        // board[0][0] is top-left, board[n-1][0] is bottom-left.
+        // We must compute the 'label' of each board[i][j].
+        // r = (n-1 - i) gives the row index from the bottom (0-based).
+        // If r is even, we go left to right; if odd, we go right to left.
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                int r = n - 1 - i; // row from the bottom
+                int label;
+                if (r % 2 == 0) {
+                    // left to right
+                    label = r * n + (j + 1);
+                } else {
+                    // right to left
+                    label = r * n + (n - j);
+                }
+                // If there's a ladder or snake at board[i][j],
+                // set finalPos[label] to its destination
+                if (board[i][j] != -1) {
+                    finalPos[label] = board[i][j];
+                }
+            }
+        }
+
+        // We now perform a BFS from square 1 to square n^2.
+        boolean[] visited = new boolean[n * n + 1];
+        Queue<Integer> queue = new LinkedList<>();
+        queue.offer(1);
+        visited[1] = true;
+
+        int moves = 0;
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            // We'll explore all nodes at the current BFS 'level',
+            // and increment 'moves' after processing them.
+            for (int i = 0; i < size; i++) {
+                int curr = queue.poll();
+                // If we've reached the final square, return the number of moves.
+                if (curr == n * n) {
+                    return moves;
+                }
+
+                // Try the next 6 squares (dice rolls).
+                for (int roll = 1; roll <= 6; roll++) {
+                    int next = curr + roll;
+                    if (next <= n * n) {
+                        int nextPos = finalPos[next];
+                        if (!visited[nextPos]) {
+                            visited[nextPos] = true;
+                            queue.offer(nextPos);
+                        }
+                    }
+                }
+            }
+            moves++;
+        }
+
+        // If we exhaust the BFS without reaching the last square,
+        // it is impossible to reach n^2.
+        return -1;
+    }
 }
 
 
