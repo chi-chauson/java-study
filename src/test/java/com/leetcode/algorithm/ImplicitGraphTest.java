@@ -194,4 +194,87 @@ class ImplicitGraphTest {
         assertEquals(1.0, result3, 1e-9);
         assertEquals(-1.0, result4, 1e-9);
     }
+
+    @Test
+    public void testExample1() {
+        ImplicitGraph solver = new ImplicitGraph();
+
+        // Example from the problem statement
+        // "AACCGGTT" -> "AACCGGTA" is 1 mutation, but let's extend the bank for a bigger test
+        String start = "AACCGGTT";
+        String end   = "AACCGGTA";
+        String[] bank = {"AACCGGTA"};
+
+        // Only 1 mutation needed
+        int result = solver.minMutation(start, end, bank);
+        assertEquals(1, result);
+    }
+
+    @Test
+    public void testMultipleSteps() {
+        ImplicitGraph solver = new ImplicitGraph();
+
+        // The path could be: AACCGGTT -> AACCGGTA -> AAACGGTA -> ... -> AACCGCTA -> ...
+        // This bank is made-up for demonstration, focusing on ensuring BFS logic is correct.
+        String start = "AACCGGTT";
+        String end   = "AAACGGTA";
+        String[] bank = {
+                "AACCGGTA",
+                "AAACGGTA",
+                "AACCGCTA",
+                "AAACGCTA"
+        };
+
+        // Possible transformation:
+        // AACCGGTT -> AACCGGTA (1st mutation)
+        // AACCGGTA -> AAACGGTA (2nd mutation)
+        // So the answer should be 2
+        int result = solver.minMutation(start, end, bank);
+        assertEquals(2, result);
+    }
+
+    @Test
+    public void testNoPossibleMutation() {
+        ImplicitGraph solver = new ImplicitGraph();
+
+        String start = "AAAAACCC";
+        String end   = "AACCCCCC";
+        String[] bank = {
+                "AAAACCCC",
+                "AAACCCCC",
+                // "AACCCCCC" missing from bank, so we can never reach end
+        };
+
+        // Should return -1 since we can't reach "AACCCCCC"
+        int result = solver.minMutation(start, end, bank);
+        assertEquals(-1, result);
+    }
+
+    @Test
+    public void testStartEqualsEnd() {
+        ImplicitGraph solver = new ImplicitGraph();
+
+        String start = "AACCGGTT";
+        String end   = "AACCGGTT";
+        String[] bank = {"AACCGGTA"}; // Doesn't matter, start == end
+
+        // No mutations needed
+        int result = solver.minMutation(start, end, bank);
+        assertEquals(0, result);
+    }
+
+    @Test
+    public void testEndNotInBank() {
+        ImplicitGraph solver = new ImplicitGraph();
+
+        String start = "AACCGGTT";
+        String end   = "AACCGGTA";
+        // Bank doesn't contain end, so there's no valid path
+        String[] bank = {"AAAAAACC", "GGGGGGGG"};
+
+        int result = solver.minMutation(start, end, bank);
+        assertEquals(-1, result);
+    }
+
+
 }

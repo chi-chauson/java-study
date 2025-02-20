@@ -1,6 +1,7 @@
 package com.leetcode.algorithm;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -130,5 +131,76 @@ public class ImplicitGraph {
         }
 
         return -1;
+    }
+
+    public int minMutation(String startGene, String endGene, String[] bank) {
+        // Quick checks
+        if (startGene.equals(endGene)) {
+            return 0;
+        }
+
+        // Convert bank to a set for O(1) containment checks
+        Set<String> bankSet = new HashSet<>(Arrays.asList(bank));
+
+        // If endGene not in bank and different from startGene, no valid path
+        if (!bankSet.contains(endGene)) {
+            return -1;
+        }
+
+        // Possible gene characters
+        char[] chars = new char[] {'A', 'C', 'G', 'T'};
+
+        // Queue for BFS: each element is (currentGene, mutationsSoFar)
+        Queue<String> queue = new LinkedList<>();
+        queue.offer(startGene);
+
+        // Visited set to avoid cycles
+        Set<String> visited = new HashSet<>();
+        visited.add(startGene);
+
+        // Number of mutations so far
+        int level = 0;
+
+        while (!queue.isEmpty()) {
+            int size = queue.size();
+            // We process each level fully, then increment level (the BFS layer)
+            for (int i = 0; i < size; i++) {
+                String current = queue.poll();
+
+                // If we have reached endGene, return the current level
+                if (current.equals(endGene)) {
+                    return level;
+                }
+
+                // Generate all possible one-character mutations
+                for (int pos = 0; pos < current.length(); pos++) {
+                    for (char c : chars) {
+                        // Only mutate if character is different
+                        if (current.charAt(pos) == c) continue;
+
+                        // Build a new gene with this single-character change
+                        String mutated = mutate(current, pos, c);
+
+                        // If it's in bank and not visited, add to queue
+                        if (bankSet.contains(mutated) && !visited.contains(mutated)) {
+                            visited.add(mutated);
+                            queue.offer(mutated);
+                        }
+                    }
+                }
+            }
+            // After processing one BFS layer, we have increased the mutation count by 1
+            level++;
+        }
+
+        // If we exit the loop, no path to endGene was found
+        return -1;
+    }
+
+    // Helper method to replace a character at a given position
+    private String mutate(String gene, int position, char newChar) {
+        char[] arr = gene.toCharArray();
+        arr[position] = newChar;
+        return new String(arr);
     }
 }
